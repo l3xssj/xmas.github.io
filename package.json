@@ -1,0 +1,13 @@
+{
+  "name": "seis-inviernos-browser-checks",
+  "version": "1.0.0",
+  "description": "Regalo de Navidad 2026 de Lex para Ale. HTML + CSS + JavaScript, sin backend ni claves.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "private": true,
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}

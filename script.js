@@ -23,12 +23,12 @@ bombillas(document.querySelector('#c1 svg'));
 const ioA=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('on')),{threshold:.6});
 document.querySelectorAll('.año').forEach(a=>ioA.observe(a));
 /* Sorpresa: la bombilla apagada */
-$('foco').onclick=()=>{$('foco').classList.add('on');$('secreto').textContent='Esta se enciende el día de nuestro primer abrazo.'};
+$('foco').onclick=()=>{$('foco').classList.add('on');$('foco').setAttribute('aria-pressed','true');$('foco').setAttribute('aria-label','Bombilla encendida. Sorpresa descubierta');$('secreto').textContent='Esta se enciende el día de nuestro primer abrazo.'};
 /* Universo: constelación */
 const E=[['Instagram',14,14,'Por aquí empezó todo entre nosotros.'],['Discord',42,8,'Ahí empezamos a hablar cada vez más.'],['Fortnite',74,16,'Una de las primeras cosas que jugamos juntos.'],['Rocket League',82,40,'Otro juego que nos dio un montón de buenos ratos.'],['Las llamadas',64,36,'Me encanta tenerte al otro lado, aunque haya más de 800 kilómetros.'],['Las conversaciones',36,32,'Contigo puedo hablar de prácticamente cualquier cosa.'],['Los consejos',12,52,'Los que me das y los que intento devolverte.'],['Las tonterías',40,60,'De estas no nos faltan, por suerte.'],['La confianza',74,68,'Me hace muy feliz poder contar contigo así.'],['Nuestra música',50,90,'Dos gustos distintos y un montón de canciones en común.']];
 const C=$('cons');C.innerHTML='<svg viewBox="0 0 100 110" aria-hidden="true"><polyline points="'+E.map(e=>e[1]+','+e[2]*1.1).join(' ')+'"/></svg>';
-E.forEach(e=>{const b=document.createElement('button');b.type='button';b.className='est';b.textContent=e[0];b.style.left=e[1]+'%';b.style.top=e[2]+'%';
-b.onclick=()=>{C.querySelectorAll('.est').forEach(x=>x.removeAttribute('aria-pressed'));b.setAttribute('aria-pressed','true');$('nota').textContent=e[3]};C.appendChild(b)});
+E.forEach(e=>{const b=document.createElement('button');b.type='button';b.className='est';b.textContent=e[0];b.style.left=e[1]+'%';b.style.top=e[2]+'%';b.setAttribute('aria-pressed','false');
+b.onclick=()=>{C.querySelectorAll('.est').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');$('nota').textContent=e[3]};C.appendChild(b)});
 /* Museo: objetos basados únicamente en vuestra historia compartida. */
 const objetosMuseo=[
   ['✉','Instagram','Por aquí empezamos a hablar después de conocernos a través de una amiga tuya. No sé en qué momento dejó de ser una conversación cualquiera, pero me alegro de que siguiéramos hablando.'],
@@ -171,3 +171,557 @@ try{const guardado=JSON.parse(localStorage.getItem(copoKey)||'null');if(guardado
 dibujarCopo();
 $('guardar-copo').onclick=()=>{try{localStorage.setItem(copoKey,JSON.stringify({brazos:+brazosCopo.value,color:colorCopo.value,detalles:+detalleCopo.value}));$('estado-copo').textContent='Diseño guardado en este navegador. Puedes volver y seguir cambiándolo.'}catch{$('estado-copo').textContent='No se pudo guardar en este navegador, pero puedes descargar el PNG.'}};
 $('descargar-copo').onclick=()=>{lienzoCopo.toBlob(blob=>{if(!blob){$('estado-copo').textContent='No se ha podido crear la imagen en este navegador.';return}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='copo-de-nieve-ale.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('estado-copo').textContent='Ya tienes tu copo descargado en PNG.'},'image/png')};
+
+/* ════════════════════════════════════════════════════════════════
+   EXPANSIÓN MASIVA — Lógica interactiva c20–c35, Logros y Extras
+   ════════════════════════════════════════════════════════════════ */
+
+/* Helper Confetti */
+function lanzarConfetti(n=35){
+  if(rm) return;
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.setProperty('--left',Math.random()*100+'%');
+    c.style.setProperty('--dur',(Math.random()*2+2)+'s');
+    c.style.setProperty('--rot',(Math.random()*1080)+'deg');
+    c.style.background=['#e6c27a','#ffe2a0','#8b2638','#48bb78','#f39c12'][Math.floor(Math.random()*5)];
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+
+/* Sistema de Logros */
+const logrosKey='regaloAle.logros';
+let misLogros=new Set();
+try{misLogros=new Set(JSON.parse(localStorage.getItem(logrosKey)||'[]'))}catch{}
+function actualizarLogrosUI(){
+  const num=$('contador-logros-num');
+  if(num) num.textContent=`${misLogros.size}/8`;
+  misLogros.forEach(id=>{
+    const el=$(id);
+    if(el) el.classList.add('desbloqueado');
+  });
+}
+function desbloquearLogro(id){
+  if(!misLogros.has(id)){
+    misLogros.add(id);
+    try{localStorage.setItem(logrosKey,JSON.stringify([...misLogros]))}catch{}
+    actualizarLogrosUI();
+    lanzarConfetti(15);
+  }
+}
+actualizarLogrosUI();
+if($('btn-abrir-logros')&&$('modal-logros')){
+  $('btn-abrir-logros').onclick=()=>{
+    const m=$('modal-logros');
+    m.hidden=!m.hidden;
+    $('btn-abrir-logros').setAttribute('aria-expanded',String(!m.hidden));
+  };
+  $('btn-cerrar-logros').onclick=()=>{
+    $('modal-logros').hidden=true;
+    $('btn-abrir-logros').setAttribute('aria-expanded','false');
+  };
+}
+
+/* c20 — 800 km no son suficientes */
+const btnPulso=$('btn-pulso-distancia'),hiloGrafico=$('hilo-grafico'),estadoPulso=$('estado-pulso-distancia');
+if(btnPulso&&hiloGrafico){
+  btnPulso.onclick=()=>{
+    hiloGrafico.classList.add('pulso-activo');
+    if(estadoPulso) estadoPulso.textContent='✦ Conexión enviada: 800 km recorridos en 0.001s. El cariño llega directo a Cáceres.';
+    lanzarConfetti(12);
+    setTimeout(()=>hiloGrafico.classList.remove('pulso-activo'),3000);
+  };
+}
+
+/* c21 — Flip Cards */
+document.querySelectorAll('.flip-card').forEach(card=>{
+  const girar=()=>{
+    card.classList.toggle('flipped');
+  };
+  card.onclick=girar;
+  card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();girar();}};
+});
+
+/* c22 — Cápsula del tiempo */
+const capsulaCont=$('capsula-container'),capsulaContenido=$('capsula-contenido'),abrirCapsula=$('abrir-capsula'),selloCapsula=$('sello-capsula');
+const capsulaKey='regaloAle.capsulaAbierta';
+function activarCapsula(){
+  if(!capsulaContenido) return;
+  capsulaContenido.hidden=false;
+  if(capsulaCont) capsulaCont.classList.add('capsula-abierta');
+  desbloquearLogro('logro-capsula');
+  try{localStorage.setItem(capsulaKey,'true')}catch{}
+}
+if(abrirCapsula) abrirCapsula.onclick=activarCapsula;
+if(selloCapsula){
+  selloCapsula.onclick=activarCapsula;
+  selloCapsula.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activarCapsula();}};
+}
+try{if(localStorage.getItem(capsulaKey)==='true') activarCapsula()}catch{}
+
+const notaCapsulaInput=$('nota-capsula-ale'),guardarNotaCapsulaBtn=$('guardar-nota-capsula'),estadoNotaCapsula=$('estado-nota-capsula');
+const notaCapsulaKey='regaloAle.notaCapsula';
+try{if(notaCapsulaInput&&localStorage.getItem(notaCapsulaKey)) notaCapsulaInput.value=localStorage.getItem(notaCapsulaKey)}catch{}
+if(guardarNotaCapsulaBtn&&notaCapsulaInput){
+  guardarNotaCapsulaBtn.onclick=()=>{
+    const txt=notaCapsulaInput.value.trim();
+    if(!txt){if(estadoNotaCapsula) estadoNotaCapsula.textContent='Escribe unas palabras para guardar.';return;}
+    try{localStorage.setItem(notaCapsulaKey,txt);if(estadoNotaCapsula) estadoNotaCapsula.textContent='✓ Guardado dentro de la cápsula para 2027.';lanzarConfetti(8);}catch{}
+  };
+}
+
+/* c23 — Promesas de amistad */
+const promesasKey='regaloAle.promesasGuardadas';
+let promesasGuardadas=new Set();
+try{promesasGuardadas=new Set(JSON.parse(localStorage.getItem(promesasKey)||'[]'))}catch{}
+const botonesPromesas=document.querySelectorAll('.promesa-postit');
+function actualizarContadorPromesas(){
+  if($('contador-promesas')) $('contador-promesas').textContent=promesasGuardadas.size;
+}
+botonesPromesas.forEach(btn=>{
+  const id=btn.dataset.promesa;
+  if(promesasGuardadas.has(id)){
+    btn.classList.add('guardada');
+    const badge=btn.querySelector('.promesa-guardada');
+    if(badge) badge.hidden=false;
+  }
+  btn.onclick=()=>{
+    if(promesasGuardadas.has(id)){
+      promesasGuardadas.delete(id);
+      btn.classList.remove('guardada');
+      const badge=btn.querySelector('.promesa-guardada');
+      if(badge) badge.hidden=true;
+    }else{
+      promesasGuardadas.add(id);
+      btn.classList.add('guardada');
+      const badge=btn.querySelector('.promesa-guardada');
+      if(badge) badge.hidden=false;
+      lanzarConfetti(6);
+    }
+    try{localStorage.setItem(promesasKey,JSON.stringify([...promesasGuardadas]))}catch{}
+    actualizarContadorPromesas();
+  };
+});
+actualizarContadorPromesas();
+
+/* c24 — Quiz interactivo */
+const quizExplicaciones=[
+  'Empezamos a hablar por una amiga tuya en Instagram en 2020. Quién nos iba a decir todo lo que vendría después.',
+  '2020: el año en que todo comenzó y que dio inicio a esta amistad tan especial.',
+  'Discord: nuestro refugio diario para partidas, charlas interminables y risas.',
+  'Fortnite y Rocket League: dos juegos donde compartimos horas y anécdotas inolvidables.',
+  'Cataluña: aquí tienes a tu bestie siempre al otro lado de la pantalla.',
+  'Cáceres: la tierra de mi persona favorita de internet.',
+  'Más de 800 kilómetros que nunca han podido con nosotros.',
+  '«Lo transmites así»: tres palabras tuyas que guardo en el corazón.'
+];
+const preguntasQuiz=document.querySelectorAll('.quiz-pregunta');
+let preguntaActual=0,puntosQuiz=0;
+preguntasQuiz.forEach((preg,idx)=>{
+  const opciones=preg.querySelectorAll('.quiz-opcion');
+  const correcta=+preg.dataset.correcta;
+  const feedback=preg.querySelector('.quiz-feedback');
+  opciones.forEach(btn=>{
+    btn.onclick=()=>{
+      opciones.forEach(b=>b.disabled=true);
+      const elegida=+btn.dataset.idx;
+      if(elegida===correcta){
+        btn.classList.add('correcta');
+        puntosQuiz++;
+        if(feedback){feedback.textContent='¡Exacto! ✦ '+quizExplicaciones[idx];feedback.hidden=false;}
+      }else{
+        btn.classList.add('incorrecta');
+        opciones[correcta].classList.add('correcta');
+        if(feedback){feedback.textContent='¡Casi! ✦ '+quizExplicaciones[idx];feedback.hidden=false;}
+      }
+      setTimeout(()=>{
+        preg.classList.remove('activa');
+        preguntaActual++;
+        const barra=$('quiz-barra');
+        if(barra) barra.style.width=`${((preguntaActual+1)/preguntasQuiz.length)*100}%`;
+        if(preguntaActual<preguntasQuiz.length){
+          preguntasQuiz[preguntaActual].classList.add('activa');
+        }else{
+          const res=$('quiz-resultado');
+          if(res){
+            res.hidden=false;
+            res.innerHTML=`<h3>¡Test completado! ✦</h3><p>Has acertado <strong>${puntosQuiz}</strong> de 8 preguntas.</p><p>${puntosQuiz>=7?'¡Me conoces mejor que nadie en el mundo! Tienes la matrícula de honor de mejores amigos. :)':puntosQuiz>=5?'¡Muy bien, neni! Se nota que nos conocemos desde hace seis años.':'¡No pasa nada! Lo importante es que lo hemos vivido juntos y nos queda mucho más por recordar.'}</p>`;
+          }
+          desbloquearLogro('logro-quiz');
+          lanzarConfetti(30);
+        }
+      },1800);
+    };
+  });
+});
+
+/* c25 — Ruleta de sorpresas */
+const premiosRuleta=[
+  ['🎄 Regalo especial','Vale por una llamada nocturna sin límite de tiempo cuando tú quieras.'],
+  ['⭐ Cumplido sincero','Eres de las personas más auténticas, leales y divertidas que tengo en mi vida.'],
+  ['❄️ Abrazo recargado','Te mando un abrazo apretado desde Cataluña que cruza los 800 kilómetros.'],
+  ['🎁 Vale canjeable','Tienes derecho a elegir la próxima película que veamos juntos online.'],
+  ['✦ Secreto revelado','A veces releo nuestros mensajes guardados cuando necesito recordar cosas bonitas.'],
+  ['🎅 Mimo navideño','Estoy tremendamente orgulloso de ti y de cómo superas cada obstáculo.'],
+  ['🦌 Risa compartida','Tu risa y tu acento extremeño son patrimonio de la humanidad.'],
+  ['🔔 Canción dedicada','Ponte un tema de Marina Reche sabiendo que tu bestie se acuerda de ti.']
+];
+const wheel=$('ruleta-wheel'),btnGirar=$('girar-ruleta'),resRuleta=$('resultado-ruleta');
+let rotacionTotal=0,girandoRuleta=false;
+if(btnGirar&&wheel){
+  btnGirar.onclick=()=>{
+    if(girandoRuleta) return;
+    girandoRuleta=true;
+    btnGirar.disabled=true;
+    if(resRuleta) resRuleta.hidden=true;
+    const indice=Math.floor(Math.random()*premiosRuleta.length);
+    const anguloPorSegmento=360/premiosRuleta.length;
+    const vueltas=5*360;
+    const anguloDestino=vueltas + (premiosRuleta.length - 1 - indice) * anguloPorSegmento;
+    rotacionTotal+=anguloDestino;
+    wheel.style.transform=`rotate(${rotacionTotal}deg)`;
+    setTimeout(()=>{
+      girandoRuleta=false;
+      btnGirar.disabled=false;
+      const premio=premiosRuleta[indice];
+      if(resRuleta){
+        resRuleta.hidden=false;
+        resRuleta.innerHTML=`<h3>${premio[0]}</h3><p>${premio[1]}</p>`;
+      }
+      lanzarConfetti(18);
+    },3600);
+  };
+}
+
+/* c26 — Búsqueda del tesoro */
+const pistasKey='regaloAle.pistasTesoro';
+let pistasEncontradas=new Set();
+try{pistasEncontradas=new Set(JSON.parse(localStorage.getItem(pistasKey)||'[]'))}catch{}
+function actualizarPistasUI(){
+  document.querySelectorAll('.indicador-pista').forEach(ind=>{
+    const p=ind.dataset.pista;
+    if(pistasEncontradas.has(p)){
+      ind.classList.add('encontrada');
+      const st=ind.querySelector('.pista-estado');
+      if(st) st.textContent='✦';
+    }
+  });
+  if(pistasEncontradas.size>=5){
+    const tf=$('tesoro-final');
+    if(tf) tf.hidden=false;
+    desbloquearLogro('logro-tesoro');
+  }
+}
+document.querySelectorAll('.pista-tesoro').forEach(btn=>{
+  const num=btn.dataset.pista;
+  btn.onclick=()=>{
+    if(!pistasEncontradas.has(num)){
+      pistasEncontradas.add(num);
+      try{localStorage.setItem(pistasKey,JSON.stringify([...pistasEncontradas]))}catch{}
+      btn.style.opacity='1';
+      btn.style.color='#ffe2a0';
+      actualizarPistasUI();
+      lanzarConfetti(12);
+      const secDestino=$('c26');
+      if(secDestino) secDestino.scrollIntoView({behavior:rm?'auto':'smooth'});
+    }
+  };
+});
+actualizarPistasUI();
+
+/* c27 — Máquina de recuerdos */
+const simbolosMaquina=['🎮','💬','✦','❄️','⭐','♫','☕','🍕'];
+const anecdotasMaquina=[
+  'Nuestras primeras partidas a Fortnite donde nos reíamos por cualquier tontería.',
+  'Cuando me llamaste tu cable a tierra: una de las cosas más bonitas que me han dicho jamás.',
+  'Las llamadas en Discord que empezaban con un "solo 5 minutos" y duraban 4 horas.',
+  'El mensaje del 13 de octubre que guardo como un tesoro: "Lo transmites así".',
+  'Cuando me compartes tus canciones de Marina Reche con toda tu ilusión.',
+  'Los días en que con solo un mensaje me alegras el día por completo.'
+];
+const btnTirarMaq=$('tirar-maquina'),resMaq=$('resultado-maquina');
+if(btnTirarMaq){
+  btnTirarMaq.onclick=()=>{
+    btnTirarMaq.disabled=true;
+    const r1=$('rodillo-1')?.querySelector('.simbolo-rodillo');
+    const r2=$('rodillo-2')?.querySelector('.simbolo-rodillo');
+    const r3=$('rodillo-3')?.querySelector('.simbolo-rodillo');
+    if(!r1||!r2||!r3) return;
+    let i=0;
+    const intervalo=setInterval(()=>{
+      r1.textContent=simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+      r2.textContent=simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+      r3.textContent=simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+      i++;
+      if(i>12){
+        clearInterval(intervalo);
+        const s1=simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+        const s2=(Math.random()>.4)?s1:simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+        const s3=(s1===s2&&Math.random()>.5)?s1:simbolosMaquina[Math.floor(Math.random()*simbolosMaquina.length)];
+        r1.textContent=s1;r2.textContent=s2;r3.textContent=s3;
+        btnTirarMaq.disabled=false;
+        if(s1===s2&&s2===s3){
+          if(resMaq) resMaq.innerHTML='<strong>¡¡JACKPOT DE MEJORES AMIGOS!! ✦✦✦</strong><br>Premio supremo: un abrazo de 10 minutos el día que nos veamos.';
+          lanzarConfetti(35);
+        }else{
+          const anec=anecdotasMaquina[Math.floor(Math.random()*anecdotasMaquina.length)];
+          if(resMaq) resMaq.textContent='«'+anec+'»';
+        }
+      }
+    },80);
+  };
+}
+
+/* c28 — Cajas de regalos digitales */
+const cajasKey='regaloAle.cajasAbiertas';
+let cajasAbiertas=new Set();
+try{cajasAbiertas=new Set(JSON.parse(localStorage.getItem(cajasKey)||'[]'))}catch{}
+const botonesCajas=document.querySelectorAll('.cajita-regalo');
+function checkTodasCajas(){
+  if(cajasAbiertas.size>=botonesCajas.length) desbloquearLogro('logro-cajas');
+}
+botonesCajas.forEach(caja=>{
+  const id=caja.dataset.caja;
+  if(cajasAbiertas.has(id)){
+    caja.classList.add('abierta');
+    caja.setAttribute('aria-expanded','true');
+    const cont=caja.querySelector('.regalo-contenido');
+    if(cont) cont.hidden=false;
+  }
+  caja.onclick=()=>{
+    caja.classList.toggle('abierta');
+    const abierta=caja.classList.contains('abierta');
+    caja.setAttribute('aria-expanded',String(abierta));
+    const cont=caja.querySelector('.regalo-contenido');
+    if(cont) cont.hidden=!abierta;
+    if(abierta){
+      cajasAbiertas.add(id);
+      lanzarConfetti(10);
+    }else{
+      cajasAbiertas.delete(id);
+    }
+    try{localStorage.setItem(cajasKey,JSON.stringify([...cajasAbiertas]))}catch{}
+    checkTodasCajas();
+  };
+});
+checkTodasCajas();
+
+/* c29 — Banda sonora */
+document.querySelectorAll('.cancion-item').forEach(item=>{
+  item.onclick=()=>{
+    const nota=item.querySelector('.cancion-nota');
+    if(!nota) return;
+    const expandida=item.classList.toggle('expandida');
+    nota.hidden=!expandida;
+  };
+});
+
+/* c30 — Pueblo navideño */
+const historiasPueblo=[
+  '🏠 La Casita de los Recuerdos: aquí guardamos cada noche de llamada, cada partida a Fortnite y todas las risas compartidas desde 2020.',
+  '🎄 La Plaza Mayor: bajo el gran abeto navideño hay una dedicatoria que cruza los 800 kilómetros sin perder ni un ápice de luz.',
+  '☕ El Café de las Tres Horas: la mesa junto a la ventana está reservada para cuando nos veamos, con dos chocolates calientes y sin prisa.',
+  '📮 Correos del Futuro: cartas guardadas para cuando celebremos diez, quince y veinte años siendo mejores amigos.',
+  '⭐ El Mirador del Abrazo: un telescopio que apunta a Cáceres y demuestra que no importa la distancia, siempre miramos el mismo cielo.'
+];
+document.querySelectorAll('.edificio-pueblo').forEach((ed,idx)=>{
+  ed.onclick=()=>{
+    const vent=$('ventana-pueblo');
+    if(vent){
+      vent.textContent=historiasPueblo[idx];
+      lanzarConfetti(6);
+    }
+  };
+});
+
+/* c31 — Bola de nieve interactiva */
+const frasesBola=[
+  '«La distancia solo asusta a quienes no saben querer de verdad. A nosotros nos hace más fuertes.»',
+  '«Seis inviernos juntos y cada Navidad estoy más agradecido de que aparecieras en mi vida.»',
+  '«Que nunca te falten motivos para sonreír, neni. Aquí tienes a alguien que siempre te apoya.»',
+  '«Tu hueco en mi vida es único y no lo va a ocupar nadie más.»',
+  '«No necesitas estar bien para hablar conmigo. Puedes escribirme siempre.»',
+  '«Ese abrazo pendiente va a llevar seis años de cariño dentro.»'
+];
+let fraseBolaIdx=0;
+const bolaEl=$('bola-nieve'),btnAgitar=$('agitar-bola'),txtBola=$('texto-bola-nieve');
+function agitarBolaNieve(){
+  if(!bolaEl) return;
+  bolaEl.classList.add('agitando');
+  setTimeout(()=>bolaEl.classList.remove('agitando'),600);
+  fraseBolaIdx=(fraseBolaIdx+1)%frasesBola.length;
+  if(txtBola) txtBola.textContent=frasesBola[fraseBolaIdx];
+  lanzarConfetti(8);
+}
+if(btnAgitar) btnAgitar.onclick=agitarBolaNieve;
+if(bolaEl){
+  bolaEl.onclick=agitarBolaNieve;
+  bolaEl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();agitarBolaNieve();}};
+}
+
+/* c32 — Buzón de deseos para 2027 */
+const formDeseos=$('form-deseos-2027'),d1=$('deseo-1'),d2=$('deseo-2'),d3=$('deseo-3'),estDeseos=$('estado-deseos-2027'),btnBorrarD=$('borrar-deseos-2027');
+const deseos2027Key='regaloAle.deseos2027';
+try{
+  const guardados=JSON.parse(localStorage.getItem(deseos2027Key)||'null');
+  if(guardados&&guardados.length>=3){
+    if(d1) d1.value=guardados[0];
+    if(d2) d2.value=guardados[1];
+    if(d3) d3.value=guardados[2];
+  }
+}catch{}
+if(formDeseos){
+  formDeseos.onsubmit=e=>{
+    e.preventDefault();
+    const val=[d1?.value.trim()||'',d2?.value.trim()||'',d3?.value.trim()||''];
+    try{
+      localStorage.setItem(deseos2027Key,JSON.stringify(val));
+      if(estDeseos) estDeseos.textContent='✓ Deseos sellados en tu dispositivo para 2027.';
+      lanzarConfetti(14);
+    }catch{}
+  };
+}
+if(btnBorrarD){
+  btnBorrarD.onclick=()=>{
+    if(d1) d1.value='';if(d2) d2.value='';if(d3) d3.value='';
+    try{localStorage.removeItem(deseos2027Key);if(estDeseos) estDeseos.textContent='Deseos borrados de este dispositivo.';}catch{}
+  };
+}
+
+/* c33 — Abrazo virtual */
+const btnAbrazo=$('enviar-abrazo'),numAbrazos=$('contador-abrazos-num'),wrapCorazones=$('corazones-flotantes');
+const abrazosKey='regaloAle.contadorAbrazos';
+let totalAbrazos=0;
+try{totalAbrazos=+localStorage.getItem(abrazosKey)||0}catch{}
+if(numAbrazos) numAbrazos.textContent=totalAbrazos;
+if(btnAbrazo&&wrapCorazones){
+  btnAbrazo.onclick=()=>{
+    totalAbrazos++;
+    if(numAbrazos) numAbrazos.textContent=totalAbrazos;
+    try{localStorage.setItem(abrazosKey,String(totalAbrazos))}catch{}
+    for(let i=0;i<8;i++){
+      const cor=document.createElement('span');
+      cor.className='corazon-flotante';
+      cor.textContent=['❤','✦','⭐','🤗'][Math.floor(Math.random()*4)];
+      cor.style.setProperty('--x',(Math.random()*80+10)+'%');
+      cor.style.setProperty('--dx',(Math.random()*40-20)+'px');
+      cor.style.setProperty('--dx2',(Math.random()*60-30)+'px');
+      cor.style.setProperty('--sz',(Math.random()*.8+1.2)+'rem');
+      wrapCorazones.appendChild(cor);
+      setTimeout(()=>cor.remove(),2200);
+    }
+  };
+}
+
+/* c35 — La última sorpresa & Fuegos artificiales */
+const fuegosCanvas=$('fuegos');
+if(fuegosCanvas){
+  const fCtx=fuegosCanvas.getContext('2d');
+  let fW,fH,particulas=[];
+  function fSize(){
+    if(!fuegosCanvas) return;
+    fW=fuegosCanvas.width=fuegosCanvas.parentElement?fuegosCanvas.parentElement.offsetWidth:innerWidth;
+    fH=fuegosCanvas.height=fuegosCanvas.parentElement?fuegosCanvas.parentElement.offsetHeight:innerHeight;
+  }
+  fSize();
+  addEventListener('resize',fSize);
+  function crearCohete(){
+    if(rm) return;
+    const x=Math.random()*fW*.8 + fW*.1;
+    const y=Math.random()*fH*.5 + fH*.15;
+    const colores=['#ffe2a0','#e6c27a','#f39c12','#e74c3c','#ffffff'];
+    for(let i=0;i<24;i++){
+      const ang=(Math.PI*2/24)*i;
+      const vel=Math.random()*2.5+1.5;
+      particulas.push({
+        x,y,vx:Math.cos(ang)*vel,vy:Math.sin(ang)*vel,
+        color:colores[Math.floor(Math.random()*colores.length)],
+        vida:1,alfa:1
+      });
+    }
+  }
+  let fAnim=null;
+  function animFuegos(){
+    if(rm) return;
+    fCtx.clearRect(0,0,fW,fH);
+    for(let i=particulas.length-1;i>=0;i--){
+      const p=particulas[i];
+      p.x+=p.vx;p.y+=p.vy;p.vy+=.03;p.vida-=.015;
+      if(p.vida<=0){particulas.splice(i,1);continue;}
+      fCtx.save();
+      fCtx.globalAlpha=p.vida;
+      fCtx.fillStyle=p.color;
+      fCtx.beginPath();
+      fCtx.arc(p.x,p.y,2.2,0,Math.PI*2);
+      fCtx.fill();
+      fCtx.restore();
+    }
+    if(Math.random()<.035) crearCohete();
+    fAnim=requestAnimationFrame(animFuegos);
+  }
+  const ioFuegos=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      desbloquearLogro('logro-final');
+      if(!rm&&!fAnim) animFuegos();
+    }else{
+      if(fAnim){cancelAnimationFrame(fAnim);fAnim=null;}
+    }
+  },{threshold:.2});
+  if($('c35')) ioFuegos.observe($('c35'));
+}
+
+/* Contador de tiempo de amistad milimétrico */
+const elRelojAmistad=$('contador-tiempo-amistad');
+if(elRelojAmistad){
+  const fechaInicio=new Date(2020,3,15,0,0,0);
+  function refrescarRelojAmistad(){
+    const ahora=new Date();
+    const difMs=ahora-fechaInicio;
+    const diasTotal=Math.floor(difMs/(1000*60*60*24));
+    const anios=Math.floor(diasTotal/365.25);
+    const diasRestantes=Math.floor(diasTotal%365.25);
+    const horas=ahora.getHours();
+    const minutos=ahora.getMinutes();
+    const segundos=ahora.getSeconds();
+    elRelojAmistad.textContent=`${anios} años, ${diasRestantes} días, ${horas} horas, ${minutos} min y ${segundos}s`;
+  }
+  refrescarRelojAmistad();
+  setInterval(refrescarRelojAmistad,1000);
+}
+
+const btnGuardarMomento=$('guardar-final-fecha'),estMomento=$('estado-final-guardado');
+if(btnGuardarMomento){
+  btnGuardarMomento.onclick=()=>{
+    const hoy=new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+    try{localStorage.setItem('regaloAle.momentoGuardado',hoy)}catch{}
+    if(estMomento) estMomento.textContent=`✦ Momento guardado: ${hoy}. Siempre en el corazón.`;
+    lanzarConfetti(35);
+  };
+}
+
+/* Interacción en notas adhesivas */
+document.querySelectorAll('.nota-adhesiva').forEach(nota=>{
+  nota.onclick=()=>{
+    lanzarConfetti(10);
+    nota.style.transform='rotate(0deg) scale(1.15)';
+    setTimeout(()=>nota.style.transform='',1200);
+  };
+});
+
+/* Logros en secciones originales */
+const originalAbrir=$('abrir');
+if(originalAbrir){
+  const prevClick=originalAbrir.onclick;
+  originalAbrir.onclick=(e)=>{
+    if(typeof prevClick==='function') prevClick(e);
+    desbloquearLogro('logro-inicio');
+  };
+}
+document.querySelectorAll('#cons .est').forEach(b=>{
+  b.addEventListener('click',()=>desbloquearLogro('logro-universo'));
+});
+document.querySelectorAll('.objeto-museo').forEach(b=>{
+  b.addEventListener('click',()=>desbloquearLogro('logro-museo'));
+});
