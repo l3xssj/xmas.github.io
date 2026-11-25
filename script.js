@@ -31,7 +31,7 @@ E.forEach(e=>{const b=document.createElement('button');b.type='button';b.classNa
 b.onclick=()=>{C.querySelectorAll('.est').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');$('nota').textContent=e[3]};C.appendChild(b)});
 /* Museo: objetos basados únicamente en vuestra historia compartida. */
 const objetosMuseo=[
-  ['✉','Instagram','Por aquí empezamos a hablar después de conocernos a través de una amiga tuya. No sé en qué momento dejó de ser una conversación cualquiera, pero me alegro de que siguiéramos hablando.'],
+  ['✉','Instagram','Por aquí empezamos a hablar después de conocernos a través de un amigo tuyo. No sé en qué momento dejó de ser una conversación cualquiera, pero me alegro de que siguiéramos hablando.'],
   ['◉','Discord','Más adelante nos pasamos a Discord y empezamos a compartir todavía más ratos. También forma parte de cómo fue creciendo lo nuestro.'],
   ['◆','Fortnite','Una de esas partidas que se convirtieron en parte de nuestra historia. No hace falta que cada recuerdo sea enorme para que me guste tenerlo aquí.'],
   ['⚽','Rocket League','Otro juego que hemos compartido durante estos años. Lo pongo en esta vitrina porque también habla de todo ese tiempo juntos.'],
@@ -65,7 +65,7 @@ function nav(){const n=$('nav'),S=document.querySelectorAll('main>section[data-t
 const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)n.querySelectorAll('a').forEach(a=>a.classList.toggle('act',a.hash==='#'+x.target.id))}),{threshold:.5});
 S.forEach(s=>{const a=document.createElement('a');a.href='#'+s.id;a.title=s.dataset.t;a.setAttribute('aria-label',s.dataset.t);n.appendChild(a);io.observe(s)})}
 /* Música de fondo: reproductor oficial de YouTube; el audio no empieza antes del primer toque. */
-const VIDEO_ID='YTRupZm8Zjg';let player=null,apiCargando=false,quiereMusica=false,sonidoActivo=true;
+const VIDEO_ID='PsVZ4atk9D4';let player=null,apiCargando=false,quiereMusica=false,sonidoActivo=true;
 function crearPlayer(){
   if(!quiereMusica||player||!window.YT)return;
   player=new YT.Player('yt-player',{width:'200',height:'200',videoId:VIDEO_ID,
@@ -102,7 +102,7 @@ $('sobre').onclick=e=>{$('carta').classList.add('abierta');e.currentTarget.setAt
 /* Calendario: doce mensajes que Ale puede abrir en el orden que quiera. */
 const sorpresas=[
 ['Un deseo de Navidad','Ojalá estas fiestas te dejen descansar, reírte mucho y estar con gente que te haga sentir bien.'],
-['Desde 2020','Me sigue haciendo gracia pensar que todo empezó por una amiga tuya y que, sin buscarlo, acabaste siendo alguien tan importante para mí.'],
+['Desde 2020','Me sigue haciendo gracia pensar que todo empezó porque un amigo tuyo nos presentó y que, sin buscarlo, acabaste siendo alguien tan importante para mí.'],
 ['Nuestra música','Tú con Marina y Alba Reche, yo con YSY A y Duki, y una playlist compartida en medio. Me gusta mucho esa mezcla tan nuestra.'],
 ['Una cosa que valoro','Me gusta que contigo puedo hablar con confianza y ser yo, incluso cuando no tengo nada especialmente interesante que contar.'],
 ['Una pequeña verdad','Seis años después seguimos encontrando cosas de las que hablar. No está nada mal para dos personas que empezaron hablando por Instagram.'],
@@ -308,7 +308,7 @@ actualizarContadorPromesas();
 
 /* c24 — Quiz interactivo */
 const quizExplicaciones=[
-  'Empezamos a hablar por una amiga tuya en Instagram en 2020. Quién nos iba a decir todo lo que vendría después.',
+  'Empezamos a hablar porque un amigo tuyo nos presentó por Instagram en 2020. Quién nos iba a decir todo lo que vendría después.',
   '2020: el año en que todo comenzó y que dio inicio a esta amistad tan especial.',
   'Discord: nuestro refugio diario para partidas, charlas interminables y risas.',
   'Fortnite y Rocket League: dos juegos donde compartimos horas y anécdotas inolvidables.',
